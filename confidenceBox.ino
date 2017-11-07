@@ -61,8 +61,8 @@ void setup() {
     Serial.println(pos);
     delay(10);                       // waits 15ms for the servo to reach the position
   }
-  myservo.detach();  // attaches the servo on pin 9 to the servo object
-  delay(3000);
+  myservo.detach();  // detach the servo, to avoid noise and current consumption
+
   Serial.println("Setup Complete");
 }
 
