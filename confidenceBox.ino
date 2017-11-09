@@ -51,9 +51,12 @@ void setup() {
   }
 
   // initialize the servo
+  Serial.println("Servo about to be attached");
+  delay(2000);
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo.write(OPEN);
-  Serial.println("Servo attached and set to 90");
+  Serial.println("Servo attached and set to 90 degrees - closed");
+  delay(2000);
 
   // lock the box (OPEN -> CLOSE)
   for (pos = OPEN; pos >= CLOSE; pos -= 1) { // goes from 180 degrees to 0 degrees
@@ -61,6 +64,8 @@ void setup() {
     Serial.println(pos);
     delay(10);                       // waits 15ms for the servo to reach the position
   }
+  delay(1000);
+  Serial.println("Servo set to 0 degrees- closed");
   myservo.detach();  // detach the servo, to avoid noise and current consumption
 
   Serial.println("Setup Complete");
@@ -70,14 +75,15 @@ void loop() {
 
   // update the LEDs constanctly and count the number of pulled levers
   int pulledCount = updateLEDs();
-  
+  Serial.println(pulledCount);
   // if all the levers are pulled, make the LEDs glow and unlock the box
-  if (pulledCount == leverCount) {
+  if (pulledCount == 0) {
     // unlock (turn servo to open)
+    Serial.println("count equals lever count");
     myservo.attach(9);
     myservo.write(OPEN);
     delay(100);
-    myservo.detach(); 
+    //myservo.detach(); 
     
     // make LED's glow
   }
