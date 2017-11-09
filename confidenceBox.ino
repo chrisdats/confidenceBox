@@ -50,12 +50,12 @@ void setup() {
     digitalWrite(leverPins[thisPin], HIGH);
   }
 
-  // initialize the servo
+  // initialize the servo and set to OPEN
   Serial.println("Servo about to be attached");
   delay(2000);
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo.write(OPEN);
-  Serial.println("Servo attached and set to 90 degrees - closed");
+  Serial.println("Servo attached and set to 90 degrees - open");
   delay(2000);
 
   // lock the box (OPEN -> CLOSE)
@@ -82,10 +82,16 @@ void loop() {
     Serial.println("count equals lever count");
     myservo.attach(9);
     myservo.write(OPEN);
-    delay(100);
-    //myservo.detach(); 
-    
+    delay(100);    
+
     // make LED's glow
+     fade(20);
+  }
+  else if (pulledCount > 0) {
+    Serial.println("count is less than lever count");
+    myservo.attach(9);
+    myservo.write(CLOSE);
+    delay(100); 
   }
 }
 
@@ -107,6 +113,24 @@ int updateLEDs() {
   }
   return count;
 }
+
+void fade(uint8_t wait) {
+  for (int i = 0; i < 50; i++){
+    for (int thisPin = 0; thisPin < leverCount; thisPin++) {   // iterate through all the levers                               // if lever is pulled down, turn green
+      pixels.setPixelColor(thisPin, pixels.Color(0,i,0));   // Moderately bright green color.
+      pixels.show();                                         // Update pixel color.
+    }
+    delay(wait);
+  }
+  for (int i = 50; i > 0; i--){
+    for (int thisPin = 0; thisPin < leverCount; thisPin++) {   // iterate through all the levers                               // if lever is pulled down, turn green
+      pixels.setPixelColor(thisPin, pixels.Color(0,i,0));   // Moderately bright green color.
+      pixels.show();                                         // Update pixel color.
+    }
+    delay(wait);
+  }
+}
+
 
 
 
