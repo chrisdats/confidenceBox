@@ -29,8 +29,8 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 
 Servo myservo;  // create servo object to control a servo
 int pos = 0;    // variable to store the servo position
-#define OPEN          90
-#define CLOSE          0
+#define OPEN          90        // 90 degrees servo position corresponds to open box
+#define CLOSE          0        // 0 degrees servo position corresponds to closed box
 
 
 void setup() {
@@ -49,14 +49,14 @@ void setup() {
     pinMode(leverPins[thisPin], INPUT);
     digitalWrite(leverPins[thisPin], HIGH);
   }
-  
+
   // initialize the servo
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo.write(OPEN);
   Serial.println("Servo attached and set to 90");
-  
-  // lock the box
-  for (pos = OPEN; pos >= 1; pos -= 1) { // goes from 180 degrees to 0 degrees
+
+  // lock the box (OPEN -> CLOSE)
+  for (pos = OPEN; pos >= CLOSE; pos -= 1) { // goes from 180 degrees to 0 degrees
     myservo.write(pos);              // tell servo to go to position in variable 'pos'
     Serial.println(pos);
     delay(10);                       // waits 15ms for the servo to reach the position
@@ -68,17 +68,38 @@ void setup() {
 
 void loop() {
 
-  for (int thisPin = 0; thisPin < leverCount; thisPin++) {    // iterate through all the levers
-    int leverState = digitalRead(leverPins[thisPin]);         // store value of lever state
-    if (leverState == 0) {                                    // if lever is pulled down, turn green
-      pixels.setPixelColor(thisPin, pixels.Color(0,25,0)); // Moderately bright green color.
-      pixels.show();                                       // Update pixel color.
+  // update the LEDs constanctly and count the number of pulled levers
+  int pulledCount = updateLEDs();
+  
+  // if all the levers are pulled, make the LEDs glow and unlock the box
+  if (pulledCount == leverCount) {
+    // unlock (turn servo to open)
+    myservo.attach(9);
+    myservo.write(OPEN);
+    delay(100);
+    myservo.detach(); 
+    
+    // make LED's glow
+  }
+}
+
+// check lever positions and adjust LEDs accordingly
+// returns number of levers pulled
+int updateLEDs() {
+  int count = 0;
+  for (int thisPin = 0; thisPin < leverCount; thisPin++) {   // iterate through all the levers
+    int leverState = digitalRead(leverPins[thisPin]);        // store value of lever state
+    if (leverState == 0) {                                   // if lever is pulled down, turn green
+      pixels.setPixelColor(thisPin, pixels.Color(0,25,0));   // Moderately bright green color.
+      pixels.show();                                         // Update pixel color.
     }
     else if (leverState == 1) {                              // if lever is pulled up (or in original position), stay/turn red
-      pixels.setPixelColor(thisPin, pixels.Color(25,0,0)); // Moderately bright red color.
-      pixels.show();                                       // Update pixel color.
+      pixels.setPixelColor(thisPin, pixels.Color(25,0,0));   // Moderately bright red color.
+      pixels.show();                                         // Update pixel color.
     }
+    count = count + leverState;  
   }
+  return count;
 }
 
 
